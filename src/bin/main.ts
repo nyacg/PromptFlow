@@ -4,6 +4,6 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 const OPEN_API_KEY = process.env.OPEN_API_KEY;
 
-const rootNode = getInitialNode();
+const rootNode = getSingleNode();
 
 console.log("Hello world")

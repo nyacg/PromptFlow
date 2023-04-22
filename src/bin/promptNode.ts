@@ -19,8 +19,13 @@ class PromptNode {
   stopCondition?: string; // If we use LMQL
 
 
-  constructor(title: string, inputs: UserInput[], children: PromptNode[], parent: PromptNode, promptTemplate: string, stopCondition?: string) {
+  constructor(
+    {title, inputs, children, promptTemplate, stopCondition, expectedNumberOfParentOutputs}: 
+    {title: string, inputs: UserInput[], children: PromptNode[], promptTemplate: string, stopCondition?: string, expectedNumberOfParentOutputs: number}
+  ) {
     this.id = crypto.randomUUID();
+    this.parentOutputs = []
+    this.model = "gpt-3.5-turbo"; // Make this a param if we want it configurable
   }
   
   // For backend to run the node
