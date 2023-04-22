@@ -21,6 +21,7 @@
     "handlebars": "^4.7.7",
     "lodash": "^4.17.21",
     "openai": "^3.2.1",
+    "prettier": "^2.8.7",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
