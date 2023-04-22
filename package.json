@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/nyacg/PromptFlow/issues"
   },
-  "homepage": "https://github.com/nyacg/PromptFlow#readme"
+  "homepage": "https://github.com/nyacg/PromptFlow#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.13"
+  }
 }
