@@ -9,7 +9,7 @@ export const getSingleNode = (): PromptNode => {
       value: "value1"
     }],
     children: [],
-    promptTemplate: "This is a prompt template {input1}",
+    promptTemplate: "This is a prompt template {{input1}}",
     expectedNumberOfParentOutputs: 0
   })
 }
