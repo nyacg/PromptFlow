@@ -13,3 +13,4 @@ export const getSingleNode = (): PromptNode => {
     expectedNumberOfParentOutputs: 0
   })
 }
+
