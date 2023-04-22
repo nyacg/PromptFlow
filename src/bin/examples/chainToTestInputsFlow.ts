@@ -27,13 +27,13 @@ export const getChainWithMultipleInputs = (): PromptNode => {
                   value: "value1"
                 }],
                 children: [],
-                promptTemplate: "This is a prompt template {{input1}}",
+                promptTemplate: "This is a prompt template {{input3}}",
                 expectedNumberOfParentOutputs: 0
               })],
             promptTemplate: "This is a prompt template {{input1}}",
             expectedNumberOfParentOutputs: 0
           })],
-        promptTemplate: "This is a prompt template {{input1}}",
+        promptTemplate: "This is a prompt template {{input2}}",
         expectedNumberOfParentOutputs: 0
       })],
     promptTemplate: "This is a prompt template {{input1}}",
