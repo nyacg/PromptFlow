@@ -1,13 +1,14 @@
+import { sleep } from "./utils";
 
 
 // Represents an input to a node that will be a text field for the end-user page
-class UserInput {
+interface UserInput {
   name: string;
   value: string;
 }
 
 
-class PromptNode {
+export class PromptNode {
   id: string;
   title: string;
   children: PromptNode[];
@@ -27,9 +28,22 @@ class PromptNode {
     this.parentOutputs = []
     this.model = "gpt-3.5-turbo"; // Make this a param if we want it configurable
   }
+
+  compilePrompt() {
+    let prompt = this.promptTemplate;
+    this.inputs.forEach(input => {
+      prompt = prompt.replace(`{${input.name}}`, input.value)
+    })
+    this.parentOutputs.forEach(output => {
+      prompt = prompt.replace(`{output}`, output)
+    })
+  }
   
   // For backend to run the node
   async run() {
+    while (this.parentOutputs.length < this.expectedNumberOfParentOutputs) {
+      await sleep(1000)
+    }
     // run prompt to get outputs
     const output = "INSERT PROMPT RESULT HERE";
 

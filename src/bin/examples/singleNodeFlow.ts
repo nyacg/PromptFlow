@@ -1,6 +1,7 @@
+import { PromptNode } from "../promptNode"
 
 
-const getSingleNode = (): PromptNode => {
+export const getSingleNode = (): PromptNode => {
   return new PromptNode({
     title: "One node with one input flow",
     inputs: [{

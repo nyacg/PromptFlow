@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import { getSingleNode } from './examples/singleNodeFlow';
 // I still need to install dotenv as a dependency -- Danny
 
 dotenv.config();
