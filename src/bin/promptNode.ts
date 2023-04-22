@@ -12,8 +12,9 @@ class PromptNode {
   title: string;
   children: PromptNode[];
   inputs: UserInput[];
-  model: 'cha'
-  parent: PromptNode;
+  parentOutputs: string[];
+  expectedNumberOfParentOutputs: number;
+  model: "gpt-3.5-turbo";
   promptTemplate: string;
   stopCondition?: string; // If we use LMQL
 
@@ -23,15 +24,18 @@ class PromptNode {
   }
   
   // For backend to run the node
-  async run(previousStepOutput: string) {
+  async run() {
     // run prompt to get outputs
-    const output = previousStepOutput ? "INSERT PROMPT RESULT HERE" : "foo"
+    const output = "INSERT PROMPT RESULT HERE";
 
     // run stop condition to see if we should stop(?)
     if (this.stopCondition)
 
     // run children
-    this.children.forEach(child => child.run(output))
+    this.children.forEach(child => {
+      child.parentOutputs = [...child.parentOutputs, output]
+      child.run()
+    })
   }
 }
 
