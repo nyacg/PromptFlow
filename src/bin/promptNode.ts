@@ -1,6 +1,7 @@
 import { sleep } from "./utils";
 import {v4 as uuidv4} from 'uuid';
 import { Configuration, OpenAIApi } from 'openai';
+import { uniqBy } from "lodash";
 
 const CONFIG = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -97,10 +98,10 @@ export class PromptNode {
 
 // Hopefully returns all inputs that exist in the flow
 // Takes the rootnode as its first argument and a new empty set as its second argument
-const listUserInputsForFlow = (flow: PromptNode, seenIds: Set<string>): UserInput[] => {
+export const listUserInputsForFlow = (flow: PromptNode, seenIds: Set<string>): UserInput[] => {
   if (seenIds.has(flow.id)) {
     return []
   }
   seenIds.add(flow.id)
-  return [...flow.inputs, ...flow.children.flatMap(child => listUserInputsForFlow(child, seenIds))]
+  return uniqBy([...flow.inputs, ...flow.children.flatMap(child => listUserInputsForFlow(child, seenIds))], (input => input.name))
 }

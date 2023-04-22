@@ -4,7 +4,7 @@
   "description": "A GenAI London Hackathon Project",
   "main": "src/bin/main.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,11 +19,17 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "handlebars": "^4.7.7",
+    "lodash": "^4.17.21",
     "openai": "^3.2.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@jest/globals": "^29.5.0",
+    "@types/lodash": "^4.14.194",
     "@types/node": "^18.15.13",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^9.0.1",
+    "babel-jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0"
   }
 }
