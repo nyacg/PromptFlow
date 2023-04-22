@@ -1,0 +1,19 @@
+{
+  "name": "promptflow",
+  "version": "1.0.0",
+  "description": "A GenAI London Hackathon Project",
+  "main": "src/bin/main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nyacg/PromptFlow.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nyacg/PromptFlow/issues"
+  },
+  "homepage": "https://github.com/nyacg/PromptFlow#readme"
+}
