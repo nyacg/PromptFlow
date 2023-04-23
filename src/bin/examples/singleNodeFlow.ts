@@ -32,3 +32,36 @@ export const getSeasideSingleNode = (): PromptNode => {
     });
 };
 
+export const expertOpinion = (): PromptNode => {
+    const expertsAnswer = new PromptNode({
+        title: "Expert's answer",
+        children: [],
+        expectedNumberOfParentOutputs: 0,
+        inputs: [
+            {
+                name: "question",
+                value: "What are Large Language Models?",
+            },
+        ],
+        output: new Output("answer"),
+        promptTemplate: `
+    Q: {{question}}
+    For instance, {{expert}} would answer:`,
+    });
+
+    return new PromptNode({
+        title: "Get expert",
+        inputs: [
+            {
+                name: "question",
+                value: "What are Large Language Models?",
+            },
+        ],
+        output: new Output("expert"),
+        children: [expertsAnswer],
+        promptTemplate: `
+    Q: {{question}}
+    A good person to answer this question would be:`,
+        expectedNumberOfParentOutputs: 0,
+    });
+};

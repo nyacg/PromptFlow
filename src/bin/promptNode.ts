@@ -11,7 +11,7 @@ const CONFIG = new Configuration({
 const OPENAI = new OpenAIApi(CONFIG);
 
 // Represents an input to a node that will be a text field for the end-user page
-interface UserInput {
+interface Input {
     name: string;
     value: string;
 }
@@ -20,7 +20,7 @@ export class PromptNode {
     id: string;
     title: string;
     children: PromptNode[];
-    inputs: UserInput[];
+    inputs: Input[];
     parentOutputs: string[];
     expectedNumberOfParentOutputs: number;
     model: "gpt-3.5-turbo";
@@ -36,7 +36,7 @@ export class PromptNode {
         expectedNumberOfParentOutputs,
     }: {
         title: string;
-        inputs: UserInput[];
+        inputs: Input[];
         children: PromptNode[];
         promptTemplate: string;
         output: Output;
@@ -55,18 +55,6 @@ export class PromptNode {
         this.model = "gpt-3.5-turbo"; // Make this a param if we want it configurable
     }
 
-    // TODO: replace this with the proper LMQL stuff
-    compilePrompt() {
-        let prompt = this.promptTemplate;
-        this.inputs.forEach((input) => {
-            prompt = prompt.replace(`{{${input.name}}}`, input.value);
-        });
-        this.parentOutputs.forEach((output) => {
-            prompt = prompt.replace(`{{output}}`, output);
-        });
-        return prompt;
-    }
-
     async runPrompt() {
         return await runLmql(generateLmql(this));
     }
@@ -81,9 +69,19 @@ export class PromptNode {
 
         console.log(response);
 
+        const outputName = Object.keys(response)[0];
+        if (response[outputName].length > 1) {
+            throw Error("Not implemented fanning yet");
+        }
+
+        const additionalInput: Input = {
+            name: outputName,
+            value: response[outputName][0],
+        };
+
         // run children
         this.children.forEach((child) => {
-            child.parentOutputs = [...child.parentOutputs, response];
+            child.inputs = [...child.inputs, additionalInput];
             child.run();
         });
     }
@@ -91,7 +89,7 @@ export class PromptNode {
 
 // Hopefully returns all inputs that exist in the flow
 // Takes the rootnode as its first argument and a new empty set as its second argument
-export const listUserInputsForFlow = (flow: PromptNode, seenIds: Set<string>): UserInput[] => {
+export const listUserInputsForFlow = (flow: PromptNode, seenIds: Set<string>): Input[] => {
     if (seenIds.has(flow.id)) {
         return [];
     }

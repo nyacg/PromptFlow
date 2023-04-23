@@ -92,6 +92,9 @@ where
 
 export async function runLmql(script: string) {
     const response = await axios.post("http://localhost:8000/run", { script });
+    if (response.status !== 200) {
+        throw Error("LMQL request failed");
+    }
     return response.data;
 }
 

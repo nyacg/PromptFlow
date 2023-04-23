@@ -39,6 +39,8 @@ async def create_item(item: Item):
     print("Got request: \n", item.script)
     output_saver = OutputSaver()
     response = await lmql.run(item.script, output_writer=output_saver)
+    if response is None:
+        raise RuntimeError()
     print("Response:\n", response)
     return output_saver.outputs
 
