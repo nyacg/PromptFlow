@@ -21,6 +21,6 @@ describe('can run a single node', () => {
   test('can run a single node', async () => {
     dotenv.config(); // bit of a hack to put this here
     const rootNode = getSeasideSingleNode();
-    await rootNode.run();
+    await rootNode.run(new Set());
   })
 })

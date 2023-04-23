@@ -9,4 +9,4 @@ const rootNode = expertOpinion();
 const inputs = listUserInputsForFlow(rootNode, new Set());
 console.log({ userInputs: inputs });
 
-rootNode.run();
+rootNode.run(new Set());
