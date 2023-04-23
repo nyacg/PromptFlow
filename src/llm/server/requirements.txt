@@ -1,4 +1,4 @@
 fastapi
 lmql
-pydantic
+pydantic==1.10.7
 uvicorn[standard]
