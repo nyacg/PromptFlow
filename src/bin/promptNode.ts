@@ -101,70 +101,84 @@ export const listUserInputsForFlow = (flow: PromptNode, seenIds: Set<string>): I
 };
 
 interface FrontendNodeType {
-  flowId: string;
-  id: string;
-  type: string;
-  data: {
-      label: string;
-  };
-  position: {
-      x: number;
-      y: number;
-  };
+    flowId: string;
+    id: string;
+    type: string;
+    data: {
+        label: string;
+    };
+    position: {
+        x: number;
+        y: number;
+    };
 }
 
 interface FrontendEdgeType {
-  id: string;
-  source: string;
-  target: string;
-  label: string;
-  markerEnd: {
-      type: any;
-  };
-  animated?: boolean;
+    id: string;
+    source: string;
+    target: string;
+    label: string;
+    markerEnd: {
+        type: any;
+    };
+    animated?: boolean;
 }
 
 const getReactFlowChartNodes = (flow: PromptNode, seenIds: Set<string>): FrontendNodeType[] => {
-  if (seenIds.has(flow.id)) {
-    return []
-  }
-  seenIds.add(flow.id)
-  const length = [...Array.from(seenIds)].length
-  const newNode = {
-    flowId: flow.id,
-    id: String(length),
-    type: 'input',
-    data: {
-      label: flow.title,
-    },
-    position: { x: 200 + length * 50, y: -50 + length * 50 },
-  }
-  return [newNode, ...flow.children.flatMap(child => getReactFlowChartNodes(child, seenIds))]
-}
+    if (seenIds.has(flow.id)) {
+        return [];
+    }
+    seenIds.add(flow.id);
+    const length = [...Array.from(seenIds)].length;
+    const newNode = {
+        flowId: flow.id,
+        id: String(length),
+        type: "input",
+        data: {
+            label: flow.title,
+        },
+        position: { x: 200 + length * 50, y: -50 + length * 50 },
+    };
+    console.log("Added node", flow.title, newNode);
+    return [newNode, ...flow.children.flatMap((child) => getReactFlowChartNodes(child, seenIds))];
+};
 
 const getFlowNodes = (flow: PromptNode, seenIds: Set<string>): PromptNode[] => {
-  if (seenIds.has(flow.id)) {
-    return []
-  }
-  seenIds.add(flow.id)
-  return [flow, ...flow.children.flatMap(child => getFlowNodes(child, seenIds))]
-}
+    if (seenIds.has(flow.id)) {
+        return [];
+    }
+    seenIds.add(flow.id);
+    return [flow, ...flow.children.flatMap((child) => getFlowNodes(child, seenIds))];
+};
 
-export const getReactFlowChartVersion = (flow: PromptNode): {nodes: FrontendNodeType[], edges: FrontendEdgeType[]} => {
-  const uiNodes = getReactFlowChartNodes(flow, new Set<string>());
-  const flowNodes = getFlowNodes(flow, new Set<string>());
+export const getReactFlowChartVersion = (
+    flow: PromptNode
+): { nodes: FrontendNodeType[]; edges: FrontendEdgeType[] } => {
+    const uiNodes = getReactFlowChartNodes(flow, new Set<string>());
+    console.log("UI nodes", uiNodes);
+    const flowNodes = getFlowNodes(flow, new Set<string>());
 
-  const edges = flowNodes.flatMap(node => {
-    return node.children.map(child => {
-      const source = uiNodes.find(uiNode => uiNode.flowId === node.id)
-      const target = uiNodes.find(uiNode => uiNode.flowId === child.id)
-      if (source && target) {
-        return { id: `e${source.id}-${target.id}`, source: source.id, target: target.id, label: '', animated: true, markerEnd: {
-          type: "arrowclosed",
-        }, }
-      } else {throw new Error("couldn't construct edges")}
-    })
-
-  })
-  return {nodes: uiNodes, edges}
-}
+    const edges = flowNodes.flatMap((node) => {
+        return node.children.map((child) => {
+            const source = uiNodes.find((uiNode) => uiNode.flowId === node.id);
+            const target = uiNodes.find((uiNode) => uiNode.flowId === child.id);
+            if (source && target) {
+                return {
+                    id: `e${source.id}-${target.id}`,
+                    source: source.id,
+                    target: target.id,
+                    label: "",
+                    animated: true,
+                    markerEnd: {
+                        type: "arrowclosed",
+                    },
+                };
+            } else {
+                throw new Error("couldn't construct edges");
+            }
+        });
+    });
+    console.log("UI nodes again", uiNodes);
+    console.log("edges", edges);
+    return { nodes: uiNodes, edges };
+};

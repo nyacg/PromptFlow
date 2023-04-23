@@ -37,6 +37,7 @@
   },
   "workspaces": [
     "src",
-    "frontend"
+    "frontend",
+    "pf-frontend"
   ]
 }
