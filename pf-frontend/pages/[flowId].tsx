@@ -5,12 +5,12 @@ import { autoGPTFlow } from "../../src/bin/examples/autoGPT";
 import { useRouter } from "next/router";
 import { Flow } from "../../src/nodes/flow";
 
-const flowLookup = {
+export const flowLookup = {
     "1": expertOpinion(),
     "2": autoGPTFlow,
 };
 
-const FlowForm = ({ flow }: { flow: Flow }) => {
+const FlowForm = ({ flow, flowId }: { flow: Flow; flowId: string }) => {
     const [formValues, setFormValues] = useState({});
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setFormValues({
@@ -19,9 +19,18 @@ const FlowForm = ({ flow }: { flow: Flow }) => {
         });
     };
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         console.log("Submitting request with", formValues);
+        const response = await fetch("/api/run", {
+            method: "POST",
+            body: JSON.stringify({
+                flowId: flowId,
+                inputs: formValues,
+            }),
+            headers: { "Content-Type": "application/json" },
+        });
+        console.log("Got response", await response.json());
     };
 
     return (
@@ -67,7 +76,7 @@ const HomePage = () => {
             >
                 {toggleView ? "Show Graph" : "Show Form "}
             </button>
-            {toggleView && <FlowForm flow={flow} />}
+            {toggleView && <FlowForm flow={flow} flowId={flowId} />}
             <div>{!toggleView && <FlowGraph flow={flow} />}</div>
         </div>
     );

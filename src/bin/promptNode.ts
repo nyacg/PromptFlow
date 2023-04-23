@@ -49,7 +49,7 @@ export class PromptNode {
         this.promptTemplate = promptTemplate;
         this.output = output;
         this.expectedNumberOfParentOutputs = expectedNumberOfParentOutputs;
-        this.final = final
+        this.final = final;
 
         ////////////////////////
         this.id = uuidv4();
@@ -68,33 +68,41 @@ export class PromptNode {
         }
         seenIds.add(this.id);
         while (this.parentOutputs.length < this.expectedNumberOfParentOutputs) {
-            console.log('waiting for parent outputs')
-            console.log({ parentOutputs: this.parentOutputs, expectedNumberOfParentOutputs: this.expectedNumberOfParentOutputs })
+            console.log("waiting for parent outputs");
+            console.log({
+                parentOutputs: this.parentOutputs,
+                expectedNumberOfParentOutputs: this.expectedNumberOfParentOutputs,
+            });
             await sleep(1000);
         }
 
-        // console.error('running prompt')
+        console.error("running prompt");
         const response = await this.runPrompt();
-        // console.error("finished running prompt")
+        console.error("finished running prompt");
 
         console.log(response);
         if (this.final) {
-            throw new Error("This is the end of the flow")
+            throw new Error("This is the end of the flow");
         }
         const outputName = Object.keys(response)[0];
-        // console.log({ outputName })
+        console.log({ outputName });
 
         // run children
         await Promise.all(
             this.children.map((child, i) => {
-                child.parentOutputs.push(response[outputName][i])
-                child.inputs = [...child.inputs, {
-                    name: lastCharacterOfStringIsDigit(outputName) ? `${outputName}` : `${outputName}${i}`,
-                    value: response[outputName][i]
-                }];
+                child.parentOutputs.push(response[outputName][i]);
+                child.inputs = [
+                    ...child.inputs,
+                    {
+                        name: lastCharacterOfStringIsDigit(outputName) ? `${outputName}` : `${outputName}${i}`,
+                        value: response[outputName][i],
+                    },
+                ];
                 child.run(seenIds);
             })
         );
+
+        return response[outputName];
     }
 }
 
