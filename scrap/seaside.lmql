@@ -1,0 +1,10 @@
+argmax
+    """A list of things not to forget when going to the seaside:"""
+    "\n\n"
+    
+    for i in range(3):
+        "- [item] \n"
+from
+    "chatgpt"
+where
+    STOPS_AT(item, "\n")

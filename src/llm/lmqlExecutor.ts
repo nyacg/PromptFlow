@@ -1,4 +1,5 @@
 import * as Handlebars from "handlebars";
+import axios from "axios";
 
 // We need to convert a Step (prompt, examples, inputs, output) into LMQL, execute it and parse the outputs
 // Output has a name, a stopping condition and a count (e.g. ListOutput is a for loop with -, stopping at \n)
@@ -88,7 +89,12 @@ where
     `;
 }
 
-function main() {
+async function runLmql(script: string) {
+    const response = await axios.post("http://localhost:8000/run", { script });
+    return response.data;
+}
+
+async function main() {
     const inputs: Input[] = [
         {
             name: "location",
@@ -102,7 +108,9 @@ function main() {
 
     const packingListNode = new PromptNode(inputs, output, promptTemplate, []);
 
-    console.log("Output lmql:\n\n", generateLmql(packingListNode));
+    const lmqlScript = generateLmql(packingListNode);
+    console.log("Output lmql:\n\n", lmqlScript);
+    console.log(await runLmql(lmqlScript));
 }
 
 main();

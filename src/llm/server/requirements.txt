@@ -1,0 +1,4 @@
+fastapi
+lmql
+pydantic
+uvicorn[standard]

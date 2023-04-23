@@ -9,3 +9,5 @@ At 11pm you can run the code by doing:
 (you will need npx, ts-node and to be in the right directory and a src/bin/.env file with a valid OPENAI_API_KEY)
 
 --Danny
+
+To run the LMQL server see `src/llm/server/README.md` 
