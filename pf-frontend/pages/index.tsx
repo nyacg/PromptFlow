@@ -1,5 +1,10 @@
 import FlowGraph from "@/components/FlowGraph";
 import { useState, ChangeEvent, FormEvent } from "react";
+import { expertOpinion } from "../../src/bin/examples/singleNodeFlow";
+import { autoGPTFlow } from "../../src/bin/examples/autoGPT";
+
+const flow = autoGPTFlow;
+
 
 interface InputSpec {
     name: string;
@@ -12,7 +17,8 @@ interface FlowSpec {
     inputs: InputSpec[];
 }
 
-const landingPageFlowSpec: FlowSpec = {
+
+const FlowSpec: FlowSpec = {
     title: "Landing Page Generator",
     description:
         "Give us a few details about your product and we'll generate a simple email collection landing page for you",
@@ -30,7 +36,7 @@ const landingPageFlowSpec: FlowSpec = {
     ],
 };
 
-const LandingPageForm = () => {
+const FlowForm = () => {
     const [formValues, setFormValues] = useState({});
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +49,44 @@ const LandingPageForm = () => {
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         console.log(formValues);
+    };
+
+    return (
+        <div>
+            <h1>{flow.title}</h1>
+            <p>{flow.description}</p>
+            <form onSubmit={handleSubmit}>
+                {flow.getUserInputs().map((input, index) => (
+                    <div key={index}>
+                        <label htmlFor={input.name}>{input.name}</label>
+                        <input
+                            type="text"
+                            id={input.name}
+                            name={input.name}
+                            placeholder={input.value}
+                            onChange={handleChange}
+                        />
+                    </div>
+                ))}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    );
+};
+
+const LandingPageForm = () => {
+    const [formValues, setFormValues] = useState({});
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setFormValues({
+            ...formValues,
+            [event.target.name]: event.target.value,
+        });
+    };
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        console.log("Request for", {flowid}, formValues);
     };
 
     return (
@@ -73,7 +117,7 @@ const HomePage = () => {
     return (
         <div>
             <button onClick={() => setToggleView(!toggleView)}>{toggleView ? "Show Graph" : "Show Form "}</button>
-            {toggleView && <LandingPageForm />}
+            {toggleView && <FlowForm />}
             <div>{!toggleView && <FlowGraph />}</div>
         </div>
     );
