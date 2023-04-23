@@ -5,8 +5,9 @@ import ReactFlow, { addEdge, Background, Controls, MiniMap, useEdgesState, useNo
 // import {getChainWithMultipleInputs} from '../../src/bin/examples/chainToTestInputsFlow'
 import { expertOpinion } from "../../src/bin/examples/singleNodeFlow";
 import { Flow } from "../../src/nodes/flow";
-import { PromptNode } from "../../src/bin/promptNode";
+import { PromptNode, Input } from "../../src/bin/promptNode";
 import { DragHandleNode } from "@/components/Nodes";
+import { autoGPT, autoGPTFlow } from "../../src/bin/examples/autoGPT";
 
 const minimapStyle = {
     height: 120,
@@ -44,8 +45,22 @@ function promptNodeToRectFlowNode(node: PromptNode, index: number): FrontendNode
     };
 }
 
+function userInputToReactFlowNode(input: Input, index: number): FrontendNodeType {
+    return {
+        flowId: input.name,
+        id: input.name,
+        type: "input",
+        data: {
+            label: input.name,
+        },
+        position: { x: 200 + index * 50, y: -150 },
+    };
+}
+
 const getReactFlowChartNodes = (flow: Flow, seenIds: Set<string>): FrontendNodeType[] => {
-    return flow.getNodes().map((node, index) => promptNodeToRectFlowNode(node, index));
+    const promptNodeNodes = flow.getNodes().map((node, index) => promptNodeToRectFlowNode(node, index));
+    const inputNodes = flow.getUserInputs().map((input, index) => userInputToReactFlowNode(input, index));
+    return [...promptNodeNodes, ...inputNodes];
 };
 
 function promptNodeToEdge(source: PromptNode, destination: PromptNode): FrontendEdgeType {
@@ -61,10 +76,27 @@ function promptNodeToEdge(source: PromptNode, destination: PromptNode): Frontend
     };
 }
 
+function inputNodeToEdge(source: Input, destination: PromptNode): FrontendEdgeType {
+    return {
+        id: `e${source.name}-${destination.id}`,
+        source: source.name,
+        target: destination.id,
+        label: "",
+        animated: true,
+        markerEnd: {
+            type: "arrowclosed",
+        },
+    };
+}
+
 function nodesToUiEdges(flow: Flow): FrontendEdgeType[] {
-    return flow
+    const promptNodeEdges = flow
         .getNodes()
         .flatMap((source) => source.children.map((destination) => promptNodeToEdge(source, destination)));
+    const inputNodeEdges = flow
+        .getNodes()
+        .flatMap((destination) => destination.inputs.map((source) => inputNodeToEdge(source, destination)));
+    return [...promptNodeEdges, ...inputNodeEdges];
 }
 
 export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[]; edges: FrontendEdgeType[] } => {
