@@ -15,17 +15,11 @@ const minimapStyle = {
 
 const onInit = (reactFlowInstance: any) => console.log("flow loaded:", reactFlowInstance);
 
-interface NodeUINodePair {
-    node: PromptNode;
-    uiNode: FrontendNodeType;
-}
-
 type FrontendNodeType = {
     id: string;
     data: { label: string };
     type: "stage" | "customInput";
     position: { x: number; y: number };
-    onClick: () => void;
 };
 
 interface FrontendEdgeType {
@@ -47,7 +41,6 @@ function promptNodeToRectFlowNode(node: PromptNode, index: number): FrontendNode
             label: node.title,
         },
         position: { x: 200 + index * 50, y: -50 + index * 120 },
-        onClick: () => console.log(node.id, "Clicked"),
     };
 }
 
@@ -58,8 +51,7 @@ function userInputToReactFlowNode(input: Input, index: number): FrontendNodeType
         data: {
             label: input.name,
         },
-        position: { x: 200 + index * 60, y: -150 },
-        onClick: () => console.log(input.name, "Clicked"),
+        position: { x: 200 + index * 60, y: -170 },
     };
 }
 
@@ -129,6 +121,8 @@ export const FlowGraph = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState<{ label: string }>(initEdges);
     const onConnect = useCallback((params: any) => setEdges((eds) => addEdge(params, eds)), []);
 
+    const onNodeClick = (event, node) => console.log("click node", node);
+
     return (
         <div style={{ width: "100vw", height: "100vh" }}>
             <ReactFlow
@@ -141,6 +135,7 @@ export const FlowGraph = () => {
                 fitView
                 nodeTypes={nodeTypes}
                 attributionPosition="top-right"
+                onNodeClick={onNodeClick}
             >
                 <MiniMap style={minimapStyle} zoomable pannable />
                 <Controls />

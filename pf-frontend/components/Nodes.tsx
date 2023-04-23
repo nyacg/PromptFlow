@@ -11,7 +11,7 @@ const green = "#f0f4c3";
 
 export function InputUiNode({ data }: any) {
     return (
-        <Node style={{ borderColor: magenta }} onClick={data.onClick}>
+        <Node style={{ borderColor: magenta }}>
             <Title>User input</Title>
             <Body>{data.label}</Body>
             <Handle type="source" position={Position.Bottom} />
@@ -21,7 +21,7 @@ export function InputUiNode({ data }: any) {
 
 export function StageUiNode({ data }: any) {
     return (
-        <Node style={{ borderColor: blue }} onClick={data.onClick}>
+        <Node style={{ borderColor: blue }}>
             <Title>Stage</Title>
             <Body>{data.label}</Body>
             <Handle type="source" position={Position.Bottom} />
