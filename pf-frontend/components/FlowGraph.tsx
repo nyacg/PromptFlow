@@ -35,7 +35,7 @@ export const FlowGraph = () => {
     });
 
     return (
-        <div style={{ width: "80vw", height: "50vh" }}>
+        <div style={{ width: "100vw", height: "100vh" }}>
             <ReactFlow
                 nodes={nodes}
                 edges={edgesWithUpdatedTypes}
@@ -48,7 +48,7 @@ export const FlowGraph = () => {
             >
                 <MiniMap style={minimapStyle} zoomable pannable />
                 <Controls />
-                <Background color="#fff" gap={16} />
+                <Background color="#aaa" gap={16} />
             </ReactFlow>
         </div>
     );
