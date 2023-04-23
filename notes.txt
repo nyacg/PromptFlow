@@ -1,0 +1,2 @@
+https://observablehq.com/@brunolaranjeira/d3-v6-force-directed-graph-with-directional-straight-arrow
+Might be an option for the directed graph creation ^ 
