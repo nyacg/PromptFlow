@@ -139,7 +139,7 @@ const getReactFlowChartNodes = (flow: PromptNode, seenIds: Set<string>): Fronten
     },
     position: { x: 200 + length * 50, y: -50 + length * 50 },
   }
-  return [newNode, ...flow.children.flatMap(child => getReactFlowChartNodes(child, seenIds).nodes)]
+  return [newNode, ...flow.children.flatMap(child => getReactFlowChartNodes(child, seenIds))]
 }
 
 const getFlowNodes = (flow: PromptNode, seenIds: Set<string>): PromptNode[] => {
