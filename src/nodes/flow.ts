@@ -12,6 +12,6 @@ export class Flow {
     }
 
     async run() {
-        return await this.rootNode.run();
+        return await this.rootNode.run(new Set());
     }
 }
