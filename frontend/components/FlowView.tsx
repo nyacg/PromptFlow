@@ -1,71 +1,139 @@
-import { useRete } from "rete-react-render-plugin";
+import { expertOpinion } from "../../src/bin/examples/singleNodeFlow";
+import ReactFlow, { addEdge, Background, Controls, MiniMap, useEdgesState, useNodesState } from "reactflow";
+import { useCallback, useEffect, useState } from "react";
+import ColorSelectorNode from "./ColorSelectorNode";
 
-import { createRoot } from "react-dom/client";
-import { NodeEditor, GetSchemes, ClassicPreset } from "rete";
-import { AreaPlugin, AreaExtensions } from "rete-area-plugin";
-
-import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
-import { ReactRenderPlugin, Presets, ReactArea2D } from "rete-react-render-plugin";
-
-type Schemes = GetSchemes<ClassicPreset.Node, ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>>;
-type AreaExtra = ReactArea2D<Schemes>;
-
-export async function createEditor(container: HTMLElement) {
-    const socket = new ClassicPreset.Socket("socket");
-
-    const editor = new NodeEditor<Schemes>();
-    const area = new AreaPlugin<Schemes, AreaExtra>(container);
-    const connection = new ConnectionPlugin<Schemes, AreaExtra>();
-    const render = new ReactRenderPlugin<Schemes>({ createRoot });
-
-    AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
-        accumulating: AreaExtensions.accumulateOnCtrl(),
-    });
-
-    render.addPreset(Presets.classic.setup({ area }));
-
-    connection.addPreset(ConnectionPresets.classic.setup());
-
-    // noinspection TypeScriptValidateTypes
-    editor.use(area);
-    // noinspection TypeScriptValidateTypes
-    area.use(connection);
-    // noinspection TypeScriptValidateTypes
-    area.use(render);
-
-    AreaExtensions.simpleNodesOrder(area);
-
-    const a = new ClassicPreset.Node("A");
-    a.addControl("a", new ClassicPreset.InputControl("text", { initial: "a" }));
-    a.addOutput("a", new ClassicPreset.Output(socket));
-    await editor.addNode(a);
-
-    const b = new ClassicPreset.Node("B");
-    b.addControl("b", new ClassicPreset.InputControl("text", { initial: "b" }));
-    b.addInput("b", new ClassicPreset.Input(socket));
-    await editor.addNode(b);
-
-    const c = new ClassicPreset.Node("C");
-    c.addControl("c", new ClassicPreset.InputControl("text", { initial: "c" }));
-    c.addInput("c", new ClassicPreset.Input(socket));
-    await editor.addNode(c);
-
-    await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "b"));
-    await editor.addConnection(new ClassicPreset.Connection(a, "a", c, "c"));
-
-    await area.translate(a.id, { x: 0, y: 0 });
-    await area.translate(b.id, { x: 270, y: 0 });
-
-    setTimeout(() => {
-        // wait until nodes rendered because they dont have predefined width and height
-        AreaExtensions.zoomAt(area, editor.getNodes());
-    }, 10);
-    return {
-        destroy: () => area.destroy(),
-    };
-}
+const initBgColor = "#dad8f6";
+const connectionLineStyle = { stroke: "#fff" };
+const snapGrid = [20, 20];
+const nodeTypes = {
+    selectorNode: ColorSelectorNode,
+};
 
 export function FlowView() {
-    const [ref, editor] = useRete(createEditor);
-    return <div ref={ref} className="rete" style={{ width: "100%", height: "1000px" }}></div>;
+    const [bgColor, setBgColor] = useState(initBgColor);
+
+    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const defaultViewport = { x: 0, y: 0, zoom: 1.5 };
+
+    const rootNode = expertOpinion();
+
+    useEffect(() => {
+        const onChange = (event) => {
+            setNodes((nds) =>
+                nds.map((node) => {
+                    if (node.id !== "2") {
+                        return node;
+                    }
+
+                    const color = event.target.value;
+
+                    setBgColor(color);
+
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            color,
+                        },
+                    };
+                })
+            );
+        };
+
+        setNodes([
+            {
+                id: "1",
+                type: "input",
+                data: { label: "An input node" },
+                position: { x: 0, y: 50 },
+                sourcePosition: "right",
+            },
+            {
+                id: "2",
+                type: "selectorNode",
+                data: { onChange: onChange, color: initBgColor },
+                style: { border: "1px solid #777", padding: 10 },
+                position: { x: 300, y: 50 },
+            },
+            {
+                id: "3",
+                type: "output",
+                data: { label: "Output A" },
+                position: { x: 650, y: 25 },
+                targetPosition: "left",
+            },
+            {
+                id: "4",
+                type: "output",
+                data: { label: "Output B" },
+                position: { x: 650, y: 100 },
+                targetPosition: "left",
+            },
+        ]);
+
+        setEdges([
+            {
+                id: "e1-2",
+                source: "1",
+                target: "2",
+                animated: true,
+                style: { stroke: "#fff" },
+            },
+            {
+                id: "e2a-3",
+                source: "2",
+                target: "3",
+                sourceHandle: "a",
+                animated: true,
+                style: { stroke: "#fff" },
+            },
+            {
+                id: "e2b-4",
+                source: "2",
+                target: "4",
+                sourceHandle: "b",
+                animated: true,
+                style: { stroke: "#fff" },
+            },
+        ]);
+    }, []);
+
+    const onConnect = useCallback(
+        (params) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#fff" } }, eds)),
+        []
+    );
+
+    return (
+        <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            style={{ background: bgColor, width: "1000px", height: 1000 }}
+            nodeTypes={nodeTypes}
+            connectionLineStyle={connectionLineStyle}
+            snapToGrid={true}
+            snapGrid={snapGrid}
+            defaultViewport={defaultViewport}
+            fitView
+            attributionPosition="bottom-left"
+        >
+            <MiniMap
+                nodeStrokeColor={(n) => {
+                    if (n.type === "input") return "#0041d0";
+                    if (n.type === "selectorNode") return bgColor;
+                    if (n.type === "output") return "#ff0072";
+                }}
+                nodeColor={(n) => {
+                    if (n.type === "selectorNode") return bgColor;
+                    return "#fff";
+                }}
+            />
+            <Controls />
+            <Background color="#aaa" gap={16} />
+        </ReactFlow>
+    );
 }

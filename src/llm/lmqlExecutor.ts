@@ -1,4 +1,4 @@
-import * as Handlebars from "handlebars";
+import Handlebars from "handlebars/dist/cjs/handlebars";
 import axios from "axios";
 import { PromptNode } from "../bin/promptNode";
 
