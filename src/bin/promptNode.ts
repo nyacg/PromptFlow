@@ -11,7 +11,7 @@ const CONFIG = new Configuration({
 const OPENAI = new OpenAIApi(CONFIG);
 
 // Represents an input to a node that will be a text field for the end-user page
-interface Input {
+export interface Input {
     name: string;
     value: string;
 }

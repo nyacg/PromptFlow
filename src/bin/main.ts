@@ -5,8 +5,8 @@ console.log("Hello world");
 import { getSeasideSingleNode, expertOpinion } from "./examples/singleNodeFlow";
 import { listUserInputsForFlow } from "./promptNode";
 
-const rootNode = expertOpinion();
-const inputs = listUserInputsForFlow(rootNode, new Set());
+const flow = expertOpinion();
+const inputs = flow.getUserInputs();
 console.log({ userInputs: inputs });
 
-rootNode.run();
+flow.run();

@@ -1,4 +1,4 @@
-import Handlebars from "handlebars/dist/cjs/handlebars";
+import * as Handlebars from "handlebars";
 import axios from "axios";
 import { PromptNode } from "../bin/promptNode";
 
@@ -97,30 +97,9 @@ where
 }
 
 export async function runLmql(script: string) {
-    const response = await axios.post("http://localhost:8000/run", { script });
+    const response = await axios.post("http://0.0.0.0:8080/run", { script });
     if (response.status !== 200) {
         throw Error("LMQL request failed");
     }
     return response.data;
 }
-
-async function main() {
-    // const inputs: Input[] = [
-    //     {
-    //         name: "location",
-    //         value: "the seaside",
-    //     },
-    // ];
-    //
-    // const promptTemplate = "A list of things not to forget when going to {{location}}:";
-    //
-    // const output = new ListOutput(3, "item");
-    //
-    // const packingListNode = new PromptNode(inputs, output, promptTemplate, []);
-    //
-    // const lmqlScript = generateLmql(packingListNode);
-    // console.log("Output lmql:\n\n", lmqlScript);
-    // console.log(await runLmql(lmqlScript));
-}
-
-main();

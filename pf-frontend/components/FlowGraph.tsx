@@ -20,7 +20,7 @@ const onInit = (reactFlowInstance: any) => console.log("flow loaded:", reactFlow
 
 export const FlowGraph = () => {
     const flow = expertOpinion();
-    const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow);
+    const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow.rootNode);
     console.log("Initial nodes", initNodes);
     console.log("Initial edges", initEdges);
 

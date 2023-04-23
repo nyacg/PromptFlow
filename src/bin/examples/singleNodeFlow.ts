@@ -1,5 +1,6 @@
 import { PromptNode } from "../promptNode";
 import { ListOutput, Output } from "../../nodes/output";
+import { Flow } from "../../nodes/flow";
 
 // export const getSingleNode = (): PromptNode => {
 //     return new PromptNode({
@@ -32,7 +33,7 @@ export const getSeasideSingleNode = (): PromptNode => {
     });
 };
 
-export const expertOpinion = (): PromptNode => {
+export const expertOpinion = (): Flow => {
     const expertsAnswer = new PromptNode({
         title: "Expert's answer",
         children: [],
@@ -48,7 +49,7 @@ export const expertOpinion = (): PromptNode => {
 For instance, {{expert}} would answer:`,
     });
 
-    return new PromptNode({
+    const getExpert = new PromptNode({
         title: "Get expert",
         inputs: [
             {
@@ -62,4 +63,6 @@ For instance, {{expert}} would answer:`,
 A good person to answer this question would be:`,
         expectedNumberOfParentOutputs: 0,
     });
+
+    return new Flow(getExpert);
 };
