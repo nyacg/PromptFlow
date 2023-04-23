@@ -1,11 +1,13 @@
-import React, { useCallback } from "react";
-import ReactFlow, { addEdge, Background, Controls, MiniMap, useEdgesState, useNodesState } from "reactflow";
+import React, { useCallback, useMemo } from "react";
+import ReactFlow, { addEdge, Background, Controls, MiniMap, NodeTypes, useEdgesState, useNodesState } from "reactflow";
 
 // TODO: get importing this stuff working given the nextjs and multiple package.json setup
 // import {getChainWithMultipleInputs} from '../../src/bin/examples/chainToTestInputsFlow'
 import { expertOpinion } from "../../src/bin/examples/singleNodeFlow";
 import { Flow } from "../../src/nodes/flow";
-import { PromptNode } from "../../src/bin/promptNode";
+import { PromptNode, Input } from "../../src/bin/promptNode";
+import { InputUiNode, StageUiNode } from "@/components/Nodes";
+import { autoGPT, autoGPTFlow } from "../../src/bin/examples/autoGPT";
 
 const minimapStyle = {
     height: 120,
@@ -18,18 +20,13 @@ interface NodeUINodePair {
     uiNode: FrontendNodeType;
 }
 
-interface FrontendNodeType {
-    flowId: string;
+type FrontendNodeType = {
     id: string;
-    type: string;
-    data: {
-        label: string;
-    };
-    position: {
-        x: number;
-        y: number;
-    };
-}
+    data: { label: string };
+    type: "stage" | "customInput";
+    position: { x: number; y: number };
+    onClick: () => void;
+};
 
 interface FrontendEdgeType {
     id: string;
@@ -42,64 +39,88 @@ interface FrontendEdgeType {
     animated?: boolean;
 }
 
-function promptNodeToRectFlowNode(node: PromptNode, length: number): FrontendNodeType {
+function promptNodeToRectFlowNode(node: PromptNode, index: number): FrontendNodeType {
     return {
-        flowId: node.id,
-        id: String(length),
-        type: "input",
+        id: node.id,
+        type: "stage",
         data: {
             label: node.title,
         },
-        position: { x: 200 + length * 50, y: -50 + length * 50 },
+        position: { x: 200 + index * 50, y: -50 + index * 120 },
+        onClick: () => console.log(node.id, "Clicked"),
     };
 }
 
-const getReactFlowChartNodes = (node: PromptNode, seenIds: Set<string>): NodeUINodePair[] => {
-    if (seenIds.has(node.id)) {
-        return [];
-    }
-    seenIds.add(node.id);
-    const length = [...Array.from(seenIds)].length;
-    const newNode = promptNodeToRectFlowNode(node, length);
-    console.log("Added node", node.title, newNode);
-    return [
-        { node: node, uiNode: newNode },
-        ...node.children.flatMap((child) => getReactFlowChartNodes(child, seenIds)),
-    ].flat();
+function userInputToReactFlowNode(input: Input, index: number): FrontendNodeType {
+    return {
+        id: input.name,
+        type: "customInput",
+        data: {
+            label: input.name,
+        },
+        position: { x: 200 + index * 60, y: -150 },
+        onClick: () => console.log(input.name, "Clicked"),
+    };
+}
+
+const getReactFlowChartNodes = (flow: Flow, seenIds: Set<string>): FrontendNodeType[] => {
+    const promptNodeNodes = flow.getNodes().map((node, index) => promptNodeToRectFlowNode(node, index));
+    const inputNodes = flow.getUserInputs().map((input, index) => userInputToReactFlowNode(input, index));
+    return [...promptNodeNodes, ...inputNodes];
 };
 
-function nodesToUiEdges(nodePairs: NodeUINodePair[]): FrontendEdgeType[] {
-    return nodePairs.flatMap(({ node, uiNode }) =>
-        node.children.map((child) => {
-            const source = uiNode;
-            const target = nodePairs.find(({ uiNode: targetUiNode }) => targetUiNode.flowId === child.id).uiNode;
-            if (source && target) {
-                return {
-                    id: `e${source.id}-${target.id}`,
-                    source: source.id,
-                    target: target.id,
-                    label: "",
-                    animated: true,
-                    markerEnd: {
-                        type: "arrowclosed",
-                    },
-                };
-            } else {
-                throw new Error("couldn't construct edges");
-            }
-        })
-    );
+function promptNodeToEdge(source: PromptNode, destination: PromptNode): FrontendEdgeType {
+    return {
+        id: `e${source.id}-${destination.id}`,
+        source: source.id,
+        target: destination.id,
+        label: "",
+        animated: true,
+        markerEnd: {
+            type: "arrowclosed",
+        },
+    };
+}
+
+function inputNodeToEdge(source: Input, destination: PromptNode): FrontendEdgeType {
+    return {
+        id: `e${source.name}-${destination.id}`,
+        source: source.name,
+        target: destination.id,
+        label: "",
+        animated: true,
+        markerEnd: {
+            type: "arrowclosed",
+        },
+    };
+}
+
+function nodesToUiEdges(flow: Flow): FrontendEdgeType[] {
+    const promptNodeEdges = flow
+        .getNodes()
+        .flatMap((source) => source.children.map((destination) => promptNodeToEdge(source, destination)));
+    const inputNodeEdges = flow
+        .getNodes()
+        .flatMap((destination) => destination.inputs.map((source) => inputNodeToEdge(source, destination)));
+    return [...promptNodeEdges, ...inputNodeEdges];
 }
 
 export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[]; edges: FrontendEdgeType[] } => {
-    const nodePairs = getReactFlowChartNodes(flow.rootNode, new Set<string>());
-    const edges = nodesToUiEdges(nodePairs);
-    const uiNodes = nodePairs.map(({ uiNode }) => uiNode);
+    const uiNodes = getReactFlowChartNodes(flow, new Set<string>());
+    const edges = nodesToUiEdges(flow);
     return { nodes: uiNodes, edges };
 };
 
 export const FlowGraph = () => {
-    const flow = expertOpinion();
+    const nodeTypes = useMemo(
+        () => ({
+            customInput: InputUiNode,
+            stage: StageUiNode,
+        }),
+        []
+    );
+
+    const flow = autoGPTFlow;
     const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow);
     console.log("Initial nodes", initNodes);
     console.log("Initial edges", initEdges);
@@ -118,6 +139,7 @@ export const FlowGraph = () => {
                 onConnect={onConnect}
                 onInit={onInit}
                 fitView
+                nodeTypes={nodeTypes}
                 attributionPosition="top-right"
             >
                 <MiniMap style={minimapStyle} zoomable pannable />

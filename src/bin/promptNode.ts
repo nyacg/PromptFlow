@@ -10,6 +10,10 @@ export interface Input {
     value: string;
 }
 
+const lastCharacterOfStringIsDigit = (str: string) => {
+    return /\d$/.test(str);
+};
+
 export class PromptNode {
     id: string;
     title: string;
@@ -20,6 +24,7 @@ export class PromptNode {
     model: "gpt-3.5-turbo";
     promptTemplate: string;
     output: Output;
+    final?: boolean;
 
     constructor({
         title,
@@ -28,6 +33,7 @@ export class PromptNode {
         promptTemplate,
         output,
         expectedNumberOfParentOutputs,
+        final,
     }: {
         title: string;
         inputs: Input[];
@@ -35,6 +41,7 @@ export class PromptNode {
         promptTemplate: string;
         output: Output;
         expectedNumberOfParentOutputs: number;
+        final?: boolean;
     }) {
         this.title = title;
         this.inputs = inputs;
@@ -42,6 +49,7 @@ export class PromptNode {
         this.promptTemplate = promptTemplate;
         this.output = output;
         this.expectedNumberOfParentOutputs = expectedNumberOfParentOutputs;
+        this.final = final
 
         ////////////////////////
         this.id = uuidv4();
@@ -70,14 +78,18 @@ export class PromptNode {
         console.error("finished running prompt")
 
         console.log(response);
+        if (this.final) {
+            throw new Error("This is the end of the flow")
+        }
         const outputName = Object.keys(response)[0];
+        console.log({ outputName })
 
         // run children
         await Promise.all(
             this.children.map((child, i) => {
                 child.parentOutputs.push(response[outputName][i])
                 child.inputs = [...child.inputs, {
-                    name: `${outputName}${i}`,
+                    name: lastCharacterOfStringIsDigit(outputName) ? `${outputName}` : `${outputName}${i}`,
                     value: response[outputName][i]
                 }];
                 child.run(seenIds);
