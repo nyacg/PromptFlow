@@ -44,9 +44,8 @@ export const expertOpinion = (): PromptNode => {
             },
         ],
         output: new Output("answer"),
-        promptTemplate: `
-    Q: {{question}}
-    For instance, {{expert}} would answer:`,
+        promptTemplate: `Q: {{question}}
+For instance, {{expert}} would answer:`,
     });
 
     return new PromptNode({
@@ -59,9 +58,8 @@ export const expertOpinion = (): PromptNode => {
         ],
         output: new Output("expert"),
         children: [expertsAnswer],
-        promptTemplate: `
-    Q: {{question}}
-    A good person to answer this question would be:`,
+        promptTemplate: `Q: {{question}}
+A good person to answer this question would be:`,
         expectedNumberOfParentOutputs: 0,
     });
 };

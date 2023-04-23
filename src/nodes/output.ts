@@ -34,7 +34,7 @@ export class ListOutput extends Output {
 
     lmqlBody = () => {
         return `
-    for i in range(${this.count}):
-        "- [${this.name}] \\n"`;
+for i in range(${this.count}):
+    "- [${this.name}] \\n"`;
     };
 }

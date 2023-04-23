@@ -78,16 +78,22 @@ export function generateLmql(node: PromptNode): string {
     }
 
     const hydratedPrompt = Handlebars.compile(node.promptTemplate)(inputValues);
-    return `
+
+    Handlebars.registerHelper("indent", function (data, indent) {
+        const out = data.replace(/\n/g, "\n" + indent);
+        return new Handlebars.SafeString(out);
+    });
+
+    return Handlebars.compile(`
 argmax
-    """${hydratedPrompt}"""
+    """{{indent hydratedPrompt '    '}}"""
     "\\n\\n"
-    ${node.output.lmqlBody()}
+    {{indent body '    '}}
 from
     "chatgpt"
 where
-    ${node.output.lmqlStopsAt()}
-    `;
+    {{indent stopsAt '    '}}
+    `)({ hydratedPrompt, body: node.output.lmqlBody(), stopsAt: node.output.lmqlStopsAt() });
 }
 
 export async function runLmql(script: string) {
