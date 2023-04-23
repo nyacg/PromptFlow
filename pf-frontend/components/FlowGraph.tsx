@@ -1,12 +1,12 @@
-import React, { useCallback } from "react";
-import ReactFlow, { addEdge, Background, Controls, MiniMap, useEdgesState, useNodesState } from "reactflow";
+import React, { useCallback, useMemo } from "react";
+import ReactFlow, { addEdge, Background, Controls, MiniMap, NodeTypes, useEdgesState, useNodesState } from "reactflow";
 
 // TODO: get importing this stuff working given the nextjs and multiple package.json setup
 // import {getChainWithMultipleInputs} from '../../src/bin/examples/chainToTestInputsFlow'
 import { expertOpinion } from "../../src/bin/examples/singleNodeFlow";
 import { Flow } from "../../src/nodes/flow";
 import { PromptNode, Input } from "../../src/bin/promptNode";
-import { DragHandleNode } from "@/components/Nodes";
+import { InputUiNode, StageUiNode } from "@/components/Nodes";
 import { autoGPT, autoGPTFlow } from "../../src/bin/examples/autoGPT";
 
 const minimapStyle = {
@@ -20,7 +20,13 @@ interface NodeUINodePair {
     uiNode: FrontendNodeType;
 }
 
-type FrontendNodeType = DragHandleNode;
+type FrontendNodeType = {
+    id: string;
+    data: { label: string };
+    type: "stage" | "customInput";
+    position: { x: number; y: number };
+    onClick: () => void;
+};
 
 interface FrontendEdgeType {
     id: string;
@@ -35,25 +41,25 @@ interface FrontendEdgeType {
 
 function promptNodeToRectFlowNode(node: PromptNode, index: number): FrontendNodeType {
     return {
-        flowId: node.id,
         id: node.id,
-        // type: "input",
+        type: "stage",
         data: {
             label: node.title,
         },
-        position: { x: 200 + index * 50, y: -50 + index * 100 },
+        position: { x: 200 + index * 50, y: -50 + index * 120 },
+        onClick: () => console.log(node.id, "Clicked"),
     };
 }
 
 function userInputToReactFlowNode(input: Input, index: number): FrontendNodeType {
     return {
-        flowId: input.name,
         id: input.name,
-        type: "input",
+        type: "customInput",
         data: {
             label: input.name,
         },
-        position: { x: 200 + index * 50, y: -150 },
+        position: { x: 200 + index * 60, y: -150 },
+        onClick: () => console.log(input.name, "Clicked"),
     };
 }
 
@@ -106,7 +112,15 @@ export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[
 };
 
 export const FlowGraph = () => {
-    const flow = expertOpinion();
+    const nodeTypes = useMemo(
+        () => ({
+            customInput: InputUiNode,
+            stage: StageUiNode,
+        }),
+        []
+    );
+
+    const flow = autoGPTFlow;
     const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow);
     console.log("Initial nodes", initNodes);
     console.log("Initial edges", initEdges);
@@ -125,6 +139,7 @@ export const FlowGraph = () => {
                 onConnect={onConnect}
                 onInit={onInit}
                 fitView
+                nodeTypes={nodeTypes}
                 attributionPosition="top-right"
             >
                 <MiniMap style={minimapStyle} zoomable pannable />
