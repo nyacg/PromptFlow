@@ -4,8 +4,9 @@ dotenv.config();
 console.log("Hello world");
 import { getSeasideSingleNode, expertOpinion } from "./examples/singleNodeFlow";
 import { listUserInputsForFlow } from "./promptNode";
+import { autoGPTFlow } from "./examples/autoGPT";
 
-const flow = expertOpinion();
+const flow = autoGPTFlow;
 const inputs = flow.getUserInputs();
 console.log({ userInputs: inputs });
 

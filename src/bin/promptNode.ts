@@ -60,6 +60,8 @@ export class PromptNode {
         }
         seenIds.add(this.id);
         while (this.parentOutputs.length < this.expectedNumberOfParentOutputs) {
+            console.log('waiting for parent outputs')
+            console.log({ parentOutputs: this.parentOutputs, expectedNumberOfParentOutputs: this.expectedNumberOfParentOutputs })
             await sleep(1000);
         }
 
@@ -68,22 +70,16 @@ export class PromptNode {
         console.error("finished running prompt")
 
         console.log(response);
-        // TODO: handle fanning somehow here so that
-        // Each child gets one of the outputs as its input 
         const outputName = Object.keys(response)[0];
-        if (response[outputName].length > 1) {
-            throw Error("Not implemented fanning yet");
-        }
-
-        const additionalInput: Input = {
-            name: outputName,
-            value: response[outputName][0],
-        };
 
         // run children
         await Promise.all(
-            this.children.map((child) => {
-                child.inputs = [...child.inputs, additionalInput];
+            this.children.map((child, i) => {
+                child.parentOutputs.push(response[outputName][i])
+                child.inputs = [...child.inputs, {
+                    name: `${outputName}${i}`,
+                    value: response[outputName][i]
+                }];
                 child.run(seenIds);
             })
         );
