@@ -72,10 +72,16 @@ const LandingPageForm = () => {
 };
 
 const HomePage = () => {
+  const [toggleView, setToggleView] = useState(false);
   return (
     <div>
-      <LandingPageForm />
-      <FlowGraph/>
+      <button onClick={() => setToggleView(!toggleView)}>
+        {toggleView ? 'Show Graph' : 'Show Form '}
+      </button>
+      {toggleView && <LandingPageForm />}
+      <div>
+      {!toggleView && <FlowGraph/>}
+      </div>
     </div>
   );
 };

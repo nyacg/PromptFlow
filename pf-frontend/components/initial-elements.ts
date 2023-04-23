@@ -1,3 +1,4 @@
+import { MarkerType } from "reactflow";
 
 
 export const initialNodes = [
@@ -27,6 +28,10 @@ export const initialNodes = [
 ];
 
 export const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', label: 'this is an edge label' },
-  { id: 'e1-3', source: '1', target: '3', animated: true },
+  { id: 'e1-2', source: '1', target: '2', label: 'this is an edge label' ,markerEnd: {
+    type: MarkerType.ArrowClosed,
+  },},
+  { id: 'e1-3', source: '1', target: '3', animated: true, markerEnd: {
+    type: MarkerType.ArrowClosed,
+  }, },
 ];

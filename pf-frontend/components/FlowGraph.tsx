@@ -34,7 +34,7 @@ export const FlowGraph = () => {
   });
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: '80vw', height: '50vh' }}>
       <ReactFlow
       nodes={nodes}
       edges={edgesWithUpdatedTypes}
