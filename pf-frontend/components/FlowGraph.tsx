@@ -13,6 +13,11 @@ const minimapStyle = {
 
 const onInit = (reactFlowInstance: any) => console.log("flow loaded:", reactFlowInstance);
 
+interface NodeUINodePair {
+    node: PromptNode;
+    uiNode: FrontendNodeType;
+}
+
 interface FrontendNodeType {
     flowId: string;
     id: string;
@@ -37,32 +42,37 @@ interface FrontendEdgeType {
     animated?: boolean;
 }
 
-const getReactFlowChartNodes = (flow: PromptNode, seenIds: Set<string>): FrontendNodeType[] => {
-    if (seenIds.has(flow.id)) {
-        return [];
-    }
-    seenIds.add(flow.id);
-    const length = [...Array.from(seenIds)].length;
-    const newNode = {
-        flowId: flow.id,
+function promptNodeToRectFlowNode(node: PromptNode, length: number): FrontendNodeType {
+    return {
+        flowId: node.id,
         id: String(length),
         type: "input",
         data: {
-            label: flow.title,
+            label: node.title,
         },
         position: { x: 200 + length * 50, y: -50 + length * 50 },
     };
-    console.log("Added node", flow.title, newNode);
-    return [newNode, ...flow.children.flatMap((child) => getReactFlowChartNodes(child, seenIds))];
-};
-export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[]; edges: FrontendEdgeType[] } => {
-    const uiNodes = getReactFlowChartNodes(flow.rootNode, new Set<string>());
-    console.log("UI nodes", uiNodes);
+}
 
-    const edges = flow.getNodes().flatMap((node) => {
-        return node.children.map((child) => {
-            const source = uiNodes.find((uiNode) => uiNode.flowId === node.id);
-            const target = uiNodes.find((uiNode) => uiNode.flowId === child.id);
+const getReactFlowChartNodes = (node: PromptNode, seenIds: Set<string>): NodeUINodePair[] => {
+    if (seenIds.has(node.id)) {
+        return [];
+    }
+    seenIds.add(node.id);
+    const length = [...Array.from(seenIds)].length;
+    const newNode = promptNodeToRectFlowNode(node, length);
+    console.log("Added node", node.title, newNode);
+    return [
+        { node: node, uiNode: newNode },
+        ...node.children.flatMap((child) => getReactFlowChartNodes(child, seenIds)),
+    ].flat();
+};
+
+function nodesToUiEdges(nodePairs: NodeUINodePair[]): FrontendEdgeType[] {
+    return nodePairs.flatMap(({ node, uiNode }) =>
+        node.children.map((child) => {
+            const source = uiNode;
+            const target = nodePairs.find(({ uiNode: targetUiNode }) => targetUiNode.flowId === child.id).uiNode;
             if (source && target) {
                 return {
                     id: `e${source.id}-${target.id}`,
@@ -77,10 +87,14 @@ export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[
             } else {
                 throw new Error("couldn't construct edges");
             }
-        });
-    });
-    console.log("UI nodes again", uiNodes);
-    console.log("edges", edges);
+        })
+    );
+}
+
+export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[]; edges: FrontendEdgeType[] } => {
+    const nodePairs = getReactFlowChartNodes(flow.rootNode, new Set<string>());
+    const edges = nodesToUiEdges(nodePairs);
+    const uiNodes = nodePairs.map(({ uiNode }) => uiNode);
     return { nodes: uiNodes, edges };
 };
 
