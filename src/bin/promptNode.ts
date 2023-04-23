@@ -2,6 +2,7 @@ import { sleep } from "./utils";
 import { v4 as uuidv4 } from "uuid";
 import { Output } from "../nodes/output";
 import { generateLmql, runLmql } from "../llm/lmqlExecutor";
+import { uniqBy } from "lodash";
 
 // Represents an input to a node that will be a text field for the end-user page
 export interface Input {
@@ -62,10 +63,13 @@ export class PromptNode {
             await sleep(1000);
         }
 
+        console.error('running prompt')
         const response = await this.runPrompt();
+        console.error("finished running prompt")
 
         console.log(response);
-
+        // TODO: handle fanning somehow here so that
+        // Each child gets one of the outputs as its input 
         const outputName = Object.keys(response)[0];
         if (response[outputName].length > 1) {
             throw Error("Not implemented fanning yet");
