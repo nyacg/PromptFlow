@@ -10,11 +10,19 @@ import ReactFlow, {
 
 import { initialEdges, initialNodes } from './initial-elements';
 
+// TODO: get importing this stuff working given the nextjs and multiple package.json setup
+// import {getReactFlowChartVersion} from '../../src/bin/promptNode'
+// import {getChainWithMultipleInputs} from '../../src/bin/examples/chainToTestInputsFlow'
+
 const minimapStyle = {
   height: 120,
 };
 
 const onInit = (reactFlowInstance: any) => console.log('flow loaded:', reactFlowInstance);
+
+// const chain = getChainWithMultipleInputs()
+// const initialStuff = getReactFlowChartVersion(chain)
+// const {edges: initialEdges, nodes: initialNodes} = initialStuff
 
 export const FlowGraph = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState<{label: string}>(initialNodes);

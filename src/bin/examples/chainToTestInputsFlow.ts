@@ -1,7 +1,7 @@
 import { PromptNode } from "../promptNode"
 
 
-export const getChainWithMultipleInputs = (): PromptNode => {
+export function getChainWithMultipleInputs() {
   return new PromptNode({
     title: "One node with one input flow",
     inputs: [{
