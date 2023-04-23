@@ -103,7 +103,7 @@ export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[
     return { nodes: uiNodes, edges };
 };
 
-export const FlowGraph = () => {
+export const FlowGraph = ({ flow }: { flow: Flow }) => {
     const nodeTypes = useMemo(
         () => ({
             customInput: InputUiNode,
@@ -112,7 +112,6 @@ export const FlowGraph = () => {
         []
     );
 
-    const flow = autoGPTFlow;
     const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow);
     console.log("Initial nodes", initNodes);
     console.log("Initial edges", initEdges);
