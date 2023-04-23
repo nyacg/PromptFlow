@@ -1,12 +1,11 @@
 import React, { useCallback } from "react";
-import ReactFlow, { addEdge, MiniMap, Controls, Background, useNodesState, useEdgesState } from "reactflow";
-
-import { initialEdges, initialNodes } from "./initial-elements";
+import ReactFlow, { addEdge, Background, Controls, MiniMap, useEdgesState, useNodesState } from "reactflow";
 
 // TODO: get importing this stuff working given the nextjs and multiple package.json setup
-import { getReactFlowChartVersion } from "../../src/bin/promptNode";
 // import {getChainWithMultipleInputs} from '../../src/bin/examples/chainToTestInputsFlow'
 import { expertOpinion } from "../../src/bin/examples/singleNodeFlow";
+import { Flow } from "../../src/nodes/flow";
+import { PromptNode } from "../../src/bin/promptNode";
 
 const minimapStyle = {
     height: 120,
@@ -14,31 +13,86 @@ const minimapStyle = {
 
 const onInit = (reactFlowInstance: any) => console.log("flow loaded:", reactFlowInstance);
 
-// const chain = getChainWithMultipleInputs()
-// const initialStuff = getReactFlowChartVersion(chain)
-// const {edges: initialEdges, nodes: initialNodes} = initialStuff
+interface FrontendNodeType {
+    flowId: string;
+    id: string;
+    type: string;
+    data: {
+        label: string;
+    };
+    position: {
+        x: number;
+        y: number;
+    };
+}
+
+interface FrontendEdgeType {
+    id: string;
+    source: string;
+    target: string;
+    label: string;
+    markerEnd: {
+        type: any;
+    };
+    animated?: boolean;
+}
+
+const getReactFlowChartNodes = (flow: PromptNode, seenIds: Set<string>): FrontendNodeType[] => {
+    if (seenIds.has(flow.id)) {
+        return [];
+    }
+    seenIds.add(flow.id);
+    const length = [...Array.from(seenIds)].length;
+    const newNode = {
+        flowId: flow.id,
+        id: String(length),
+        type: "input",
+        data: {
+            label: flow.title,
+        },
+        position: { x: 200 + length * 50, y: -50 + length * 50 },
+    };
+    console.log("Added node", flow.title, newNode);
+    return [newNode, ...flow.children.flatMap((child) => getReactFlowChartNodes(child, seenIds))];
+};
+export const getReactFlowChartVersion = (flow: Flow): { nodes: FrontendNodeType[]; edges: FrontendEdgeType[] } => {
+    const uiNodes = getReactFlowChartNodes(flow.rootNode, new Set<string>());
+    console.log("UI nodes", uiNodes);
+
+    const edges = flow.getNodes().flatMap((node) => {
+        return node.children.map((child) => {
+            const source = uiNodes.find((uiNode) => uiNode.flowId === node.id);
+            const target = uiNodes.find((uiNode) => uiNode.flowId === child.id);
+            if (source && target) {
+                return {
+                    id: `e${source.id}-${target.id}`,
+                    source: source.id,
+                    target: target.id,
+                    label: "",
+                    animated: true,
+                    markerEnd: {
+                        type: "arrowclosed",
+                    },
+                };
+            } else {
+                throw new Error("couldn't construct edges");
+            }
+        });
+    });
+    console.log("UI nodes again", uiNodes);
+    console.log("edges", edges);
+    return { nodes: uiNodes, edges };
+};
 
 export const FlowGraph = () => {
     const flow = expertOpinion();
-    const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow.rootNode);
+    const { nodes: initNodes, edges: initEdges } = getReactFlowChartVersion(flow);
     console.log("Initial nodes", initNodes);
     console.log("Initial edges", initEdges);
 
     const [nodes, setNodes, onNodesChange] = useNodesState<{ label: string }>(initNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState<{ label: string }>(initEdges);
     const onConnect = useCallback((params: any) => setEdges((eds) => addEdge(params, eds)), []);
-
-    // we are using a bit of a shortcut here to adjust the edge type
-    // this could also be done with a custom edge for example
-    // const edgesWithUpdatedTypes = edges.map((edge) => {
-    //     if (edge.sourceHandle) {
-    //         //@ts-ignore this was in the library example so I hope it's ok
-    //         const edgeType = nodes.find((node) => node.type === "custom").data.selects[edge.sourceHandle];
-    //         edge.type = edgeType;
-    //     }
-    //
-    //     return edge;
-    // });
 
     return (
         <div style={{ width: "100vw", height: "100vh" }}>
