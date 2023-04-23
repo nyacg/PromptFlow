@@ -73,16 +73,16 @@ export class PromptNode {
             await sleep(1000);
         }
 
-        console.error('running prompt')
+        // console.error('running prompt')
         const response = await this.runPrompt();
-        console.error("finished running prompt")
+        // console.error("finished running prompt")
 
         console.log(response);
         if (this.final) {
             throw new Error("This is the end of the flow")
         }
         const outputName = Object.keys(response)[0];
-        console.log({ outputName })
+        // console.log({ outputName })
 
         // run children
         await Promise.all(

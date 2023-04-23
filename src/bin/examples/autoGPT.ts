@@ -48,7 +48,7 @@ For instance, {{expert}} would answer:`,
         inputs: [
           {
             name: "goal",
-            value: "I want to win a London-based hackathon that's centred around using foundation models (LLMs)",
+            value: "I want to win a London-based hackathon that's centred around using Foundation Models",
           }
         ],
         output: new ListOutput(N, "rankedtasks"),
