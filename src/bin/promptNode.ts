@@ -60,7 +60,11 @@ export class PromptNode {
     }
 
     // For backend to run the node
-    async run() {
+    async run(seenIds: Set<string>) {
+        if (seenIds.has(this.id)) {
+            return;
+        }
+        seenIds.add(this.id);
         while (this.parentOutputs.length < this.expectedNumberOfParentOutputs) {
             await sleep(1000);
         }
@@ -80,10 +84,10 @@ export class PromptNode {
         };
 
         // run children
-        this.children.forEach((child) => {
+        await Promise.all(this.children.map((child) => {
             child.inputs = [...child.inputs, additionalInput];
-            child.run();
-        });
+            child.run(seenIds);
+        }));
     }
 }
 
