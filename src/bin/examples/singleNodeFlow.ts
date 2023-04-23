@@ -59,7 +59,8 @@ For instance, {{expert}} would answer:`,
         ],
         output: new Output("expert"),
         children: [expertsAnswer],
-        promptTemplate: `Q: {{question}}
+        promptTemplate: `Who is the best type of person/expert to ask the following question to? 
+{{question}}
 A good person to answer this question would be:`,
         expectedNumberOfParentOutputs: 0,
     });
