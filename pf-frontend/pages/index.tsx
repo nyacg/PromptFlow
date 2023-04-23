@@ -1,4 +1,7 @@
+import FlowGraph from '@/components/FlowGraph';
 import { useState, ChangeEvent, FormEvent } from 'react';
+
+
 
 interface InputSpec {
   name: string;
@@ -72,6 +75,7 @@ const HomePage = () => {
   return (
     <div>
       <LandingPageForm />
+      <FlowGraph/>
     </div>
   );
 };

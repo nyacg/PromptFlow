@@ -85,7 +85,7 @@ export class PromptNode {
     console.log({output})
 
     // run stop condition to see if we should stop(?)
-    if (this.stopCondition)
+    if (this.stopCondition) {}
 
     // run children
     this.children.forEach(child => {
