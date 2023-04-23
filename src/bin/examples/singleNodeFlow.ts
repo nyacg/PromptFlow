@@ -64,5 +64,5 @@ A good person to answer this question would be:`,
         expectedNumberOfParentOutputs: 0,
     });
 
-    return new Flow(getExpert);
+    return new Flow(getExpert, "Expert Opinion", "Get an expert's opinion on any question you can think of");
 };

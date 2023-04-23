@@ -2,9 +2,13 @@ import { getFlowNodes, Input, listUserInputsForFlow, PromptNode } from "../bin/p
 
 export class Flow {
     rootNode: PromptNode;
+    title: string;
+    description: string;
 
-    constructor(rootNode: PromptNode) {
+    constructor(rootNode: PromptNode, title: string, description: string) {
         this.rootNode = rootNode;
+        this.title = title;
+        this.description = description;
     }
 
     getUserInputs(): Input[] {
