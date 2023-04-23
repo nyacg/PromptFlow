@@ -2,6 +2,8 @@ import { sleep } from "./utils";
 import { v4 as uuidv4 } from "uuid";
 import { Configuration, OpenAIApi } from "openai";
 import { uniqBy } from "lodash";
+import { Output } from "../nodes/output";
+import { generateLmql, runLmql } from "../llm/lmqlExecutor";
 
 const CONFIG = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -23,28 +25,28 @@ export class PromptNode {
     expectedNumberOfParentOutputs: number;
     model: "gpt-3.5-turbo";
     promptTemplate: string;
-    stopCondition?: string; // If we use LMQL
+    output: Output;
 
     constructor({
         title,
         inputs,
         children,
         promptTemplate,
-        stopCondition,
+        output,
         expectedNumberOfParentOutputs,
     }: {
         title: string;
         inputs: UserInput[];
         children: PromptNode[];
         promptTemplate: string;
-        stopCondition?: string;
+        output: Output;
         expectedNumberOfParentOutputs: number;
     }) {
         this.title = title;
         this.inputs = inputs;
         this.children = children;
         this.promptTemplate = promptTemplate;
-        this.stopCondition = stopCondition;
+        this.output = output;
         this.expectedNumberOfParentOutputs = expectedNumberOfParentOutputs;
 
         ////////////////////////
@@ -65,14 +67,8 @@ export class PromptNode {
         return prompt;
     }
 
-    runPrompt(prompt: string) {
-        // Example prompt runner
-        return OPENAI.createCompletion({
-            model: "text-davinci-003",
-            prompt,
-            temperature: 0,
-            max_tokens: 70,
-        });
+    async runPrompt() {
+        return await runLmql(generateLmql(this));
     }
 
     // For backend to run the node
@@ -80,24 +76,14 @@ export class PromptNode {
         while (this.parentOutputs.length < this.expectedNumberOfParentOutputs) {
             await sleep(1000);
         }
-        const prompt = this.compilePrompt();
-        console.log({ prompt });
 
-        const response = await this.runPrompt(prompt);
-        const output = response.data.choices[0].text;
+        const response = await this.runPrompt();
 
-        if (!output) {
-            throw new Error(`No output from OpenAI for ${prompt}`);
-        }
-        console.log({ output });
-
-        // run stop condition to see if we should stop(?)
-        if (this.stopCondition) {
-        }
+        console.log(response);
 
         // run children
         this.children.forEach((child) => {
-            child.parentOutputs = [...child.parentOutputs, output];
+            child.parentOutputs = [...child.parentOutputs, response];
             child.run();
         });
     }

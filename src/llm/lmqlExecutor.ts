@@ -1,5 +1,6 @@
 import * as Handlebars from "handlebars";
 import axios from "axios";
+import { PromptNode } from "../bin/promptNode";
 
 // We need to convert a Step (prompt, examples, inputs, output) into LMQL, execute it and parse the outputs
 // Output has a name, a stopping condition and a count (e.g. ListOutput is a for loop with -, stopping at \n)
@@ -52,21 +53,21 @@ interface Input {
 
 class Example {}
 
-class PromptNode {
-    inputs: Input[];
-    output: Output;
-    promptTemplate: string;
-    examples: Example[];
+// class PromptNode {
+//     inputs: Input[];
+//     output: Output;
+//     promptTemplate: string;
+//     examples: Example[];
+//
+//     constructor(inputs: Input[], output: Output, promptTemplate: string, examples: Example[]) {
+//         this.inputs = inputs;
+//         this.output = output;
+//         this.promptTemplate = promptTemplate;
+//         this.examples = examples;
+//     }
+// }
 
-    constructor(inputs: Input[], output: Output, promptTemplate: string, examples: Example[]) {
-        this.inputs = inputs;
-        this.output = output;
-        this.promptTemplate = promptTemplate;
-        this.examples = examples;
-    }
-}
-
-function generateLmql(node: PromptNode): string {
+export function generateLmql(node: PromptNode): string {
     // Prompt template has variables with the curly braces notation named with the `input.name` (e.g. {{INPUT_NAME}})
     // Examples are TODO (some kind of input(s), response pair, maybe including the parsed output separately)
     // Outputs need to be paired with a stopping condition and the right square brackets syntax
@@ -89,28 +90,28 @@ where
     `;
 }
 
-async function runLmql(script: string) {
+export async function runLmql(script: string) {
     const response = await axios.post("http://localhost:8000/run", { script });
     return response.data;
 }
 
 async function main() {
-    const inputs: Input[] = [
-        {
-            name: "location",
-            value: "the seaside",
-        },
-    ];
-
-    const promptTemplate = "A list of things not to forget when going to {{location}}:";
-
-    const output = new ListOutput(3, "item");
-
-    const packingListNode = new PromptNode(inputs, output, promptTemplate, []);
-
-    const lmqlScript = generateLmql(packingListNode);
-    console.log("Output lmql:\n\n", lmqlScript);
-    console.log(await runLmql(lmqlScript));
+    // const inputs: Input[] = [
+    //     {
+    //         name: "location",
+    //         value: "the seaside",
+    //     },
+    // ];
+    //
+    // const promptTemplate = "A list of things not to forget when going to {{location}}:";
+    //
+    // const output = new ListOutput(3, "item");
+    //
+    // const packingListNode = new PromptNode(inputs, output, promptTemplate, []);
+    //
+    // const lmqlScript = generateLmql(packingListNode);
+    // console.log("Output lmql:\n\n", lmqlScript);
+    // console.log(await runLmql(lmqlScript));
 }
 
 main();
