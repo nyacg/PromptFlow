@@ -19,7 +19,7 @@ describe('gets inputs in chain', () => {
 
 describe('can run a single node', () => {
   test('can run a single node', async () => {
-    dotenv.config();
+    dotenv.config(); // bit of a hack to put this here
     const rootNode = getSingleNode();
     await rootNode.run();
   })
